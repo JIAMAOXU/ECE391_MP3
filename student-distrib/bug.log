@@ -1,0 +1,574 @@
+<=========================================================>
+<=================>    BUG LOG HEADER   <=================>
+<=========================================================>
+Assignment:
+    MP3
+CheckPoint:
+    CP1
+CreateTime:
+    2022.10.15
+
+<--------------------------------------------------------->
+                          BUG 1                          
+<--------------------------------------------------------->
+Time:
+    2022.10.15.
+Creator:
+    Peizhe Liu.
+Description:
+    After implementing GDT and IDT, the system will bootloop.
+Solution:
+    This is due to a failed test case. The test case tests for the first 10 IDT
+    entries. However, I did not implement #2 entry because it is "RESERVED"
+    according to Intel manual. Implement it resolved the issue and passed the
+    test case.
+    This is a Algorithmic Error. Cost me 4 hours.
+
+<--------------------------------------------------------->
+                          BUG 2                          
+<--------------------------------------------------------->
+Time:
+    2022.10.15.
+Creator:
+    Peizhe Liu.
+Description:
+    The exception handler is never called.
+Solution:
+    This is due to not setting the bits in IDT entries correctly. Before and After
+    "size" bit on struct there are "reserved" bits around, and they should be set
+    according to the Intel manual. Setting the bit resolved the issue.
+    This is a Algorithmic Error. Cost me 5 hours.
+
+<--------------------------------------------------------->
+                          BUG 3                          
+<--------------------------------------------------------->
+Time:
+    2022.10.16.
+Creator:
+    Peizhe Liu.
+Description:
+    Keyboard will never trigger a second interrupt.
+Solution:
+    It is due to the handler never read from the keyboard port. Unless the port is
+    accessed, the keyboard will never issue the second interrupt.
+    This is a Algorithmic Error. Cost me 2 hours.
+
+<--------------------------------------------------------->
+                          BUG 4                          
+<--------------------------------------------------------->
+Time:
+    2022.10.16.
+Creator:
+    Peizhe Liu.
+Description:
+    RTC is not sending any interrupt.
+Solution:
+    It is due to the primary PIC's IRQ 2 is masked. Further investigate, the underlying
+    reason is the internal mask is never updated when enabling/disabling IRQ.
+    This is a Algorithmic Error. Cost me 5 hours.
+
+<--------------------------------------------------------->
+                          BUG 5                          
+<--------------------------------------------------------->
+Time:
+    2022.10.15.
+Creator:
+    Jiamao Xu.
+Description:
+    SEND_EOI not working
+Solution:
+    The EOI has to output value or'ed with corresponding IEQ number and send it to the command port.
+    If it is send to the data port which equals port + 1, the SEND_EOI will not work at all. 
+    This is a Algorithmic Error. Cost 2 hours.
+
+<--------------------------------------------------------->
+                          BUG 6                          
+<--------------------------------------------------------->
+Time:
+    2022.10.16.
+Creator:
+    Eric Chen & Jiamao Xu.
+Description:
+    paging C file is working. Assembly code issue. 
+Solution:
+    We found that our C file for paging is correct but the assembly code alwasy cause problem. 
+    The paging is not enabled. After check the register value in cr0, we found that cr0 is not 
+    working. We actually missed a dollar sign before the number when moving the value in cr0. 
+    This is a Semantic Error. Cost 6 hours.
+
+<--------------------------------------------------------->
+                          BUG 7                          
+<--------------------------------------------------------->
+Time:
+    2022.10.16.
+Creator:
+    Eric Chen & Jiamao Xu.
+Description:
+    The physical address. Argument data type wrong
+Solution:
+    The pd_adress we set has a fixed hex value address. But the paging is not working correctly. 
+    We changed the address to pointer of the page table (uint32_t)pageTable and shift it right
+    by 12 bit to make it fit in the space. 
+    This is a Algorithmic Error. Cost 6 hours.
+
+<--------------------------------------------------------->
+                          BUG 8                         
+<--------------------------------------------------------->
+Time:
+    2022.10.16.
+Creator:
+    Eric Chen & Jiamao Xu.
+Description:
+    Page table loop error.
+Solution:
+    Orginal code loop the page table from 184 to 192 and filling correspoding value. But the page table 
+    is wrong. We delete the loop function and fill in value to 0x8B address directly to solve the problem.
+    This is a Algorithmic Error. Cost 2 hours.
+
+<--------------------------------------------------------->
+                          BUG 9                          
+<--------------------------------------------------------->
+Time:
+    2022.10.21.
+Creator:
+    Letian Zhang & Peizhe Liu.
+Description:
+    The rtc tests will sometimes print at the top instead of at the bottom when the screen is full of characters.
+Solution:
+    Removed the modulo operation on screen_y in the first if block in putc. The modulos previous present throughout
+    putc should be all offloaded into the vertical screen scrolling logic.
+
+<--------------------------------------------------------->
+                          BUG 10                          
+<--------------------------------------------------------->
+Time:
+    2022.10.21.
+Creator:
+    Peizhe Liu & Letian Zhang.
+Description:
+    Pressing backspace can "eat up" the previous lines after new line character, which should not be allowed.
+Solution:
+    This is due to an ignored edge case. Added checking for current buf length resolved the issue.
+
+<--------------------------------------------------------->
+                          BUG 11                          
+<--------------------------------------------------------->
+Time:
+    2022.10.21.
+Creator:
+    Peizhe Liu.
+Description:
+    Terminal handler keeps returning size of 4 and giving errors, cannot R/W normally.
+Solution:
+    This is due to the limitation of C. We cannot read the length of array based on a pointer.
+    I had to remove the relevent parameter safe checking.
+
+<--------------------------------------------------------->
+                          BUG 12                          
+<--------------------------------------------------------->
+Time:
+    2022.10.22.
+Creator:
+    Jiamao Xu & Eric Chen
+Description:
+    Given a specific address, can't read address information correctly. 
+Solution:
+    When dealing with address, we first cast the address into a unsigned int pointer using (uint8_t*) or (uint32_t*)
+    then we dereference this pointer to get the data located at this address. 
+
+<--------------------------------------------------------->
+                          BUG 13                          
+<--------------------------------------------------------->
+Time:
+    2022.10.22.
+Creator:
+    Jiamao Xu & Eric Chen
+Description:
+    Some files that have inode number larger than all the inode we have can still be read
+Solution:
+    we add a sanity check at the beginning of read data process to check
+    if the inode number exceed all the inode we have. If that happens, we return -1
+    which means the read_data process failed. 
+
+<--------------------------------------------------------->
+                          BUG 14                         
+<--------------------------------------------------------->
+Time:
+    2022.10.22.
+Creator:
+    Jiamao Xu & Eric Chen
+Description:
+    When reading the data, if the offset or length is large, the program
+    may continuly read even it reach the end of file
+Solution:
+    we add a sanity check at the beginning of read data process to check
+    if the the length+offest is larger than file size. If so, we modify the
+    length to file_size-offset to make sure we do not read outside of file. 
+
+<--------------------------------------------------------->
+                          BUG 15                          
+<--------------------------------------------------------->
+Time:
+    2022.10.22.
+Creator:
+    Eric Chen
+Description:
+    File read only reads last chunk of bits if the size of the file is over 4096.
+Solution:
+    Refactor memcpy logic for when file is over 4096 (using more than 1 block of data)
+    Make sure to copy only the all 4096 bytes of data block if file is greater than 4096.
+    Keep a data_read counter that will decrement upon each data block read.
+    Increment buffer accordingly... (3 hours)
+
+<--------------------------------------------------------->
+                          BUG 16                          
+<--------------------------------------------------------->
+Time:
+    2022.10.22.
+Creator:
+    Jiamao Xu & Eric Chen
+Description:
+    RTC not able to be found when using dir read by index
+Solution:
+    Find each specific directory by name in test cases.
+    Apparently RTC and . are both in inode 0 causing confusion when looping through directory entries by index.
+    (4 hours)
+
+<--------------------------------------------------------->
+                          BUG 17                          
+<--------------------------------------------------------->
+Time:
+    2022.11.4.
+Creator:
+    Peizhe Liu.
+Description:
+    After IRET to switch to user mode, the OS generates a GPF immediately.
+Solution:
+    After investigating the stack right before IRET, I realized I wrongly pushed the 16-bit segment
+    registers by using pushw. pushw only advances the esp by 2, but we want it to advance by 4 and
+    dword aligned. Correcting the push resolved the issue.
+    Caused me 6 hours.
+
+<--------------------------------------------------------->
+                          BUG 18                          
+<--------------------------------------------------------->
+Time:
+    2022.11.5.
+Creator:
+    Peizhe Liu.
+Description:
+    After IRET to switch to user mode, the OS bootloops..
+Solution:
+    By investgating, it shows the EIP is actually correct and the program started to execute in
+    user mode, but when the program makes a syscall, it will jump to the wrong kernel stack, which
+    is completely wrong and completely non-paged. Then, the kernel will cause a PF, and processor
+    will push some info to the current stack and call the exception handler. However, when trying
+    to push the information, it will cause another PF, and finally, another PF, and a triple fault.
+    Correcting the TSS resolved the issue.
+    Caused me a WHOLE night at 3026, I have to sleep on the ground. About 10 hours.
+    But honestly it shouldn't.
+
+<--------------------------------------------------------->
+                          BUG 19                          
+<--------------------------------------------------------->
+Time:
+    2022.11.6.
+Creator:
+    Peizhe Liu & Eric Chen.
+Description:
+    Halting a program will somethimes cause a PF, first halt is fine, but second halt will do.
+Solution:
+    After investigation, it seems that the halt function will jump to the wrong kernel stack (we
+    want to jump to the parent PID's kernel stack, because parent called the new program). However,
+    it still jumps to the kernel stack of itself, and caused undefined behavior. Further investigation
+    shows the TSS setting of halt is wrong, it is off by one PID. Correcting the TSS resolved the
+    issue.
+    Caused me 5 hours. The fix was way tougher than the previous bug.
+
+<--------------------------------------------------------->
+                          BUG 20                          
+<--------------------------------------------------------->
+Time:
+    2022.11.6.
+Creator:
+    Jiamao Xu & Peizhe Liu
+Description:
+    fail several syserr tests. 
+Solution:
+    After investigation, the reason is that we did not follow the instruction to setup 
+    the proper return value and edge case test. For example, in system open function
+    we used to return 0 for successful. However, the return value should be i which is 
+    equal to fd number. 
+
+<--------------------------------------------------------->
+                          BUG 21                        
+<--------------------------------------------------------->
+Time:
+    2022.11.6.
+Creator:
+    Jiamao Xu & Peizhe Liu
+Description:
+    After we type ls, the screen scroll down very quickly. 
+Solution:
+    After investigation, we found that our implemention of directory read in file system
+    is wrong. We recreated the dir open function. This function will look into the bootblock
+    and extract the file name for single file at one time and populate it to the open file array.
+
+
+<--------------------------------------------------------->
+                          BUG 22                          
+<--------------------------------------------------------->
+Time:
+    2022.11.6.
+Creator:
+    Jiamao Xu & Peizhe Liu
+Description:
+    ls now working but only showing part of the file name. 
+Solution:
+    After investigation, we found that ls program is using buffer to write to terminal.
+    So we add a memory copy function in the last line of directory read function to 
+    copy the file name from directory to buffer in nbyte length.
+
+<--------------------------------------------------------->
+                          BUG 23                          
+<--------------------------------------------------------->
+Time:
+    2022.11.6.
+Creator:
+    Jiamao Xu & Peizhe Liu
+Description:
+    Need to obtain how many data we read from a file. 
+Solution:
+    We changed the return value of read_data function from 0 to bytesread
+    where bytesread is calculated based on how many block we read times 
+    the blocksize. 
+
+<--------------------------------------------------------->
+                          BUG 24                          
+<--------------------------------------------------------->
+Time:
+    2022.11.6.
+Creator:
+    Eric Chen.
+Description:
+    File open description pointers not functioning properly
+Solution:
+    Fixed syntactical errors and made a struct pointer to all open, close, read, and write
+    files in syscalls.h and create individual struct pointers in syscalls.c file for rtc,
+    directory, terminal, file, etc. (3 hours)
+
+<--------------------------------------------------------->
+                          BUG 25                          
+<--------------------------------------------------------->
+Time:
+    2022.11.6.
+Creator:
+    Eric Chen.
+Description:
+    Page faulting after each individual exit/halt on a program
+Solution:
+    Mathematical error with unmap page helper function in paging.C
+    Bit shifting too much to the right and not inserting correct new parent address
+    into page directory on a program exit/halt. (2 hours)
+
+<--------------------------------------------------------->
+                          BUG 26                          
+<--------------------------------------------------------->
+Time:
+    2022.11.12.
+Creator:
+    Peizhe Liu.
+Description:
+    cat read from wrong file and cause PF.
+Solution:
+    It is due to the file_read is not following the convention. It won't read from the specified
+    file in the FD, and it is not caring about nbytes. Fixing the file_read resolved the issue. (8 hours)
+
+<--------------------------------------------------------->
+                          BUG 27                          
+<--------------------------------------------------------->
+Time:
+    2022.11.13.
+Creator:
+    Peizhe Liu.
+Description:
+    fish refused to work, it loads from a closed FD infiniately.
+Solution:
+    It is due to the buffer is used to pass the inode, which is 32bit or 4 bytes. The buffer will
+    rewrite the neighbor buffers and it will erase the contents inside them. fish holds two buffers,
+    and they are continuous in the memory, thus the buffer 1 is not working and will always load \0.
+    But the syscall always assume the buffer is good, and it will response read length equal to zero
+    after traversing everything, and fish will close that FD. But buffer 1 will never give a new line
+    character to indicate the line is finished reading, so fish will reattempt to read from it. (4 hours)
+
+<--------------------------------------------------------->
+                          BUG 28                          
+<--------------------------------------------------------->
+Time:
+    2022.11.14.
+Creator:
+    Peizhe Liu.
+Description:
+    After several new lines, fish refused to work, it displays nothing.
+Solution:
+    It is due to wrong intialization was set in the last row of memory during scrolling. Used the method
+    provided in clear() to clear the last row fixed the issue. (2 hours)
+
+<--------------------------------------------------------->
+                          BUG 29                          
+<--------------------------------------------------------->
+Time:
+    2022.11.26.
+Creator:
+    Peizhe Liu.
+Description:
+    The screen is not reacting to terminal switch.
+Solution:
+    I misunderstood the terminal switch. It turns out that the VRAM is fixed at phy.mem 0x8B000,
+    and it is not paged. Then, I redesigned the whole VRAM switch and managed to resolve it with
+    various VRAM backup area. (4 hours)
+
+<--------------------------------------------------------->
+                          BUG 30                          
+<--------------------------------------------------------->
+Time:
+    2022.11.27.
+Creator:
+    Peizhe Liu.
+Description:
+    After terminal switch, the keyboard is not reacting.
+Solution:
+    It is due to I did not send EOI when handling the terminal switch combination key.
+    Sending EOI implicitly resolved the issue. (1 hour)
+
+
+<--------------------------------------------------------->
+                          BUG 31                          
+<--------------------------------------------------------->
+Time:
+    2022.11.27.
+Creator:
+    Peizhe Liu.
+Description:
+    The cursor is not changing after a terminal switch.
+Solution:
+    I forgot to reset the cursur. (10 minutes)
+
+<--------------------------------------------------------->
+                          BUG 32                          
+<--------------------------------------------------------->
+Time:
+    2022.11.31.
+Creator:
+    Peizhe Liu.
+Description:
+    After enabled scheduler, the key will echo on different terminals.
+Solution:
+    I remap vid_mem when doing background context switch. Thus, the key will
+    be echoed to different video memories. Adding a function to force remap the
+    video memory solved the issue. (6 hours)
+
+
+<--------------------------------------------------------->
+                          BUG 33                          
+<--------------------------------------------------------->
+Time:
+    2022.11.31.
+Creator:
+    Peizhe Liu.
+Description:
+    After enabled scheduler, the the program will start on the wrong terminal.
+Solution:
+    It is due to the terminal buffer is not duplicated. Thus, pressing the enter key will
+    send whatever current buffer to the currently running terminal, causing a new program
+    to be executed. (6 hours)
+
+<--------------------------------------------------------->
+                          BUG 34                          
+<--------------------------------------------------------->
+Time:
+    2022.12.1.
+Creator:
+    Peizhe Liu.
+Description:
+    When executing fish on different terminal, fish will appear on other terminals as well,
+    even though the vidmap is remapped.
+Solution:
+    I forgot to flush the TLB (30 minutes).
+
+<--------------------------------------------------------->
+                          BUG 35                          
+<--------------------------------------------------------->
+Time:
+    2022.12.2.
+Creator:
+    Peizhe Liu.
+Description:
+    After switching to another terminal, attempting to do anything as simple as hitting the enter
+    key will crash all other terminals and report a 0x46 PF.
+Solution:
+    It was due to the incorrect mapping for 4MB program page. Fixed in 2 days. It was soooo TOUGH
+    to discover the issue since GDB single-stepping will basically give me garbage, well it is
+    true since the program page is screwed, so whatever. (2 days)
+
+<--------------------------------------------------------->
+                          BUG 36                          
+<--------------------------------------------------------->
+Time:
+    2022.12.2.
+Creator:
+    Peizhe Liu.
+Description:
+    Compile error in asm file: Invalid character '_' in mnemonic. This is not a typical error,
+    Googling was not helpful.
+Solution:
+    Forgot a ":" after label. (30 minutes)
+
+<--------------------------------------------------------->
+                          BUG 37                          
+<--------------------------------------------------------->
+Time:
+    2022.12.3.
+Creator:
+    Peizhe Liu.
+Description:
+    When debugging scheduler, I found that when pressing ENTER key without releasing, there will be
+    empty lines, seems the buffer is handled twice.
+Solution:
+    It is due to a lag in scheduler. Keyboard buffer has the highest priority that it will print a
+    new line character on the active terminal whatever process is running, but the buffer handling is
+    based on the scheduler. If multiple ENTER received, it will print several times, but the buffer handling
+    has a lag to print the prompt (391OS>), creating empty lines (and previous buffer is lost).
+    I forced a switch if keyboard handler print something to the terminal to make sure real time handling. (1 night)
+
+<--------------------------------------------------------->
+                          BUG 38                          
+<--------------------------------------------------------->
+Time:
+    2022.12.3.
+Creator:
+    Peizhe Liu.
+Description:
+    When debugging, I found that if the current terminal is actively printing, it is possible that is will
+    print something to the newly switched terminal (not process).
+Solution:
+    It is another lag in scheduler. After terminal switch and without a context switch, VRAM is updated, but
+    vram address for putc to write to is still the old position, thus make the putc put to wrong VRAM.
+    I forced a switch after terminal switch. (1 hour).
+
+<--------------------------------------------------------->
+                          BUG 39                          
+<--------------------------------------------------------->
+Time:
+    2022.12.7.
+Creator:
+    Peizhe Liu.
+Description:
+    There are tons of bug about signal. I cannot call signal due to DPL check, signal won't return due to
+    kernel stack was overwritten, invalid TSS due to incorrect segment registers, and alarm handler execution
+    make the segfault handler not working.
+Solution:
+    Ended up with doing a temparary disable of system protection, taking a stackshot prior to stack preparation,
+    rewriting linkage to save segments and fix Excep# placement, and adding a special mask and enforcing the
+    priority, which is not documented. (2 days)
+    Peizhe Liu, 19:38 PM, Dec. 7, 2022, at Latitude, Champaign. Thank you ECE391, and good luck on final.

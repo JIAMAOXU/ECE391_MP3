@@ -1,0 +1,23 @@
+#ifndef _COLOR_H
+#define _COLOR_H
+
+#define DEFAULT_COLOR 0x0B
+
+#define BASIC_DARK_GREY 0x08
+#define BASIC_LIGHT_BLUE 0x09
+#define BASIC_LIGHT_GREEN 0x0A
+#define BASIC_LIGHT_CYAN 0x0B
+#define BASIC_LIGHT_RED 0x0C
+#define BASIC_LIGHT_MAGENTA 0x0D
+#define BASIC_YELLOW 0x0E
+#define BASIC_WHITE 0x0F
+#define INV_DARK_GREY 0x80
+#define INV_LIGHT_BLUE 0x90
+#define INV_LIGHT_GREEN 0xA0
+#define INV_LIGHT_CYAN 0xB0
+#define INV_LIGHT_RED 0xC0
+#define INV_LIGHT_MAGENTA 0xD0
+#define INV_YELLOW 0xE0
+#define INV_WHITE 0xF0
+
+#endif
